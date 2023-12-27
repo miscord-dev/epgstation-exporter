@@ -4,6 +4,7 @@ go 1.21.5
 
 require (
 	github.com/deepmap/oapi-codegen v1.16.2
+	github.com/deepmap/oapi-codegen/v2 v2.0.0
 	github.com/getkin/kin-openapi v0.122.0
 	github.com/labstack/echo/v4 v4.11.4
 )
