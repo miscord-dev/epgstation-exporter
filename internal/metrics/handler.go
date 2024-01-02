@@ -6,14 +6,11 @@ import (
 	"github.com/miscord-dev/epgstation-exporter/api/epgstation"
 	"github.com/prometheus/client_golang/prometheus"
 	"log/slog"
-	"time"
 )
 
 const (
-	// namespace is the namespace of the metrics
 	namespace       = "epgstation"
 	defaultBaseURL  = "http://localhost:8888/api"
-	defaultTimeout  = 5 * time.Second
 	defaultMaxRetry = 3
 )
 
@@ -86,13 +83,17 @@ func (e *exporter) Describe(ch chan<- *prometheus.Desc) {
 func (e *exporter) Collect(ch chan<- prometheus.Metric) {
 	e.logger.Info("Collecting metrics")
 
-	e.collectMetrics(ch)
+	if err := e.collectMetrics(ch); err != nil {
+		e.logger.Error("Failed to collect metrics", slog.String("error", err.Error()))
+		// TODO: count errors and expose it as metrics
+		return
+	}
 
 	e.logger.Info("Collected metrics")
 }
 
 // collectMetrics collects metrics from EPGStation
-func (e *exporter) collectMetrics(ch chan<- prometheus.Metric) {
+func (e *exporter) collectMetrics(ch chan<- prometheus.Metric) error {
 	e.logger.Debug("Collecting metrics from EPGStation")
 
 	var rules []epgstation.Rule
@@ -106,7 +107,7 @@ func (e *exporter) collectMetrics(ch chan<- prometheus.Metric) {
 	}
 	if err != nil {
 		e.logger.Error("Failed to get rules from EPGStation", slog.String("error", err.Error()))
-		return
+		return err
 	}
 
 	e.logger.Debug("Got rules from EPGStation", rules)
@@ -123,6 +124,8 @@ func (e *exporter) collectMetrics(ch chan<- prometheus.Metric) {
 	}
 
 	e.logger.Debug("Collected metrics from EPGStation")
+
+	return nil
 }
 
 // getEPGStationRules returns the rules obtained via EPGStation API
@@ -138,10 +141,14 @@ func getEPGStationRules(c *epgstation.Client) ([]epgstation.Rule, error) {
 		return nil, fmt.Errorf("failed to get rules: %w", err)
 	}
 
-	rules, err := epgstation.ParseGetRulesResponse(r)
+	res, err := epgstation.ParseGetRulesResponse(r)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	return rules.JSON200.Rules, nil
+	if res.JSON200 == nil {
+		return nil, fmt.Errorf("request failed with %d: %+v", res.StatusCode(), res.JSONDefault)
+	}
+
+	return res.JSON200.Rules, nil
 }
