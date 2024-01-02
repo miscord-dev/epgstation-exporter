@@ -10,8 +10,9 @@ import (
 
 func main() {
 	var (
-		maxRetry = flag.Int("max-retry", 3, "max retry for the exporter")
-		baseURL  = flag.String("base-url", "http://localhost:8888/api", "base URL for the exporter")
+		maxRetry      = flag.Int("max-retry", 3, "max retry for the exporter")
+		baseURL       = flag.String("base-url", "http://localhost:8888/api", "base URL for the exporter")
+		listenAddress = flag.String("listen-address", ":2112", "listen address for the exporter")
 	)
 	flag.Parse()
 	e, err := metrics.New(
@@ -23,5 +24,5 @@ func main() {
 	}
 	prometheus.MustRegister(e)
 	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":2112", nil)
+	http.ListenAndServe(*listenAddress, nil)
 }
