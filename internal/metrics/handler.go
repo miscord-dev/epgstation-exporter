@@ -130,8 +130,8 @@ func (e *exporter) collectMetrics(ch chan<- prometheus.Metric) {
 func getEPGStationRules(c *epgstation.Client) ([]epgstation.Rule, error) {
 	r, err := c.GetRules(context.Background(), &epgstation.GetRulesParams{
 		Offset:  nil,
-		Limit:   nil,
-		Type:    nil,
+		Limit:   intPtr(0), // get all rules
+		Type:    getReserveTypePtr("all"),
 		Keyword: nil,
 	})
 	if err != nil {
