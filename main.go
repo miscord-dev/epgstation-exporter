@@ -13,6 +13,7 @@ func main() {
 		maxRetry = flag.Int("max-retry", 3, "max retry for the exporter")
 		baseURL  = flag.String("base-url", "http://localhost:8888/api", "base URL for the exporter")
 	)
+	flag.Parse()
 	e, err := metrics.New(
 		metrics.WithBaseURL(*baseURL),
 		metrics.WithMaxRetry(*maxRetry),
