@@ -17,5 +17,5 @@ COPY --from=builder /workspace/epgstation-exporter .
 USER 65532:65532
 
 ENTRYPOINT [ "/epgstation-exporter" ]
-EXPOSE 2121
+EXPOSE 2112
 
