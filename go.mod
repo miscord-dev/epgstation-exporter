@@ -1,6 +1,6 @@
 module github.com/miscord-dev/epgstation-exporter
 
-go 1.21.5
+go 1.21.6
 
 require (
 	github.com/getkin/kin-openapi v0.123.0
